@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "prebuild": "npm audit fix --force || exit 0",
-    "build":"npm install --prefix Backend && npm install --prefix Frontend && npm run build Frontend",
+    "build": "cd Backend && npm install && cd ../Frontend && npm install && npm run build",
     "start": "npm run start"
   },
   "keywords": [],
