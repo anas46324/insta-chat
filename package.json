@@ -2,10 +2,10 @@
   "name": "chat-app",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "src/app.js",
   "scripts": {
     "build": "cd Backend && npm install && cd ../Frontend && npm install && npm run build",
-     "start": "cd Backend && node app.js"
+     "start": "cd Backend && node src/app.js"
   },
   "keywords": [],
   "author": "",
