@@ -1,5 +1,5 @@
 const express = require('express');
-const { signup, signin, OAuth, googleSignup, logout, updateUser, checkAuth } = require('../controllers/auth.controller.js');
+const { signup, signin, OAuth, googleSignup, logout, updateUser, checkAuth, authSignIn } = require('../controllers/auth.controller.js');
 const protectRoute = require('../middleware/jwtHelper.js');
 
 const router = express.Router();
@@ -7,6 +7,8 @@ const router = express.Router();
   router.post('/signup', signup)
 
   router.post('/signin', signin);
+  
+  router.post('/authSignIn', authSignIn);
 
   router.get('/', OAuth);
 

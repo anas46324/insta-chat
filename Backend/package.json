@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "node src/app.js",
+    "start": "nodemon src/app.js",
     "dev": "nodemon app.js"
   },
   "keywords": [],
@@ -23,6 +23,7 @@
     "google-auth-library": "^9.15.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.9.2",
+    "nodemailer": "^6.10.0",
     "nodemon": "^3.1.9",
     "socket.io": "^4.8.1"
   }

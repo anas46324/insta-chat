@@ -10,12 +10,14 @@ import { Loader } from 'lucide-react'
 import {Toaster}  from 'react-hot-toast'
 import useAuthStore from "./store/useAuthStore"
 import useThemeStore from "./store/useThemeStore"
+import AuthDirectPage from "./pages/AuthDirectPage"
 
 const App = () => {
-  const {authUser, checkAuth, isCheckingAuth, onlineUsers} = useAuthStore()
+  const {authUser, checkAuth, isCheckingAuth, onlineUsers,authRedirect} = useAuthStore()
   const {theme} = useThemeStore()
 
   useEffect(() => {
+    // if(location.pathname == "/auth") return
     checkAuth()
   }, [checkAuth]);
 
@@ -28,8 +30,9 @@ const App = () => {
 
   return (
     <div data-theme={theme}>
-      <Navbar/>
+      {location.pathname !== "/auth" && <Navbar />}
       <Routes>
+        <Route path="/auth" element={<AuthDirectPage/>} />
         <Route path="/" element={authUser ? <HomePage/> : <Navigate to= "/login" />} />
         <Route path="/signup" element={!authUser ? <SignUpPage/> : <Navigate to= "/"/>}/>
         <Route path="/login" element={!authUser ? <LoginPage/> : <Navigate to= "/"/>}/>

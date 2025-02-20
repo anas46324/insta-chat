@@ -6,9 +6,12 @@ const User = require('../models/User');
 const jwt = require('jsonwebtoken');
 const generateToken = require('../libs/utils');
 const  cloudinary = require('../libs/cloudinary');
+// const { sendEmail } = require('../libs/mailer');
 
 
 const client = new OAuth2Client(process.env.Google_Client_ID)
+const BASE_URL = process.env.NODE === " development" ? "http://localhost:3000" : "/"
+
 
 function decrypt(password){
     let bytes = CryptoJS.AES.decrypt(password, process.env.CRYPTO_SECRET);
@@ -32,6 +35,7 @@ function decrypt(password){
         if(newUser){
             generateToken(newUser._id, res)
             await newUser.save();
+            generateSignInToken(email,password)
             res.json({ status : 200, message: 'User created', data:{
                 id : newUser._id,
                 name: newUser.name,
@@ -49,9 +53,7 @@ function decrypt(password){
     }
 
     const signin = async (req, res) => {
-            console.log(req.body);
             let email = req.body.email
-            // let password = decrypt(req.body.password)
             let password = req.body.password
             
             try {
@@ -65,6 +67,7 @@ function decrypt(password){
                     return res.status(201).json({ message:'Incorrect password'});
                 }
                 else{
+                    console.log(user._id, res.cookie)
                     generateToken(user._id, res)
                     res.status(200).json({ message: 'User Logged In Successfully', data:{
                         _id : user._id,
@@ -72,8 +75,8 @@ function decrypt(password){
                         email: user.email,
                         profilePic: user.profilePic
                     } });
+                    
                 }
-                // res.json({ status : 400, message: 'Failed to Login user' });
             }
             catch(err){
                 console.log(err);
@@ -161,6 +164,45 @@ function decrypt(password){
         }
     }
 
+    const authSignIn = async (req, res) => {
+        let email
+        let password
+        let token = req.query.token
+        console.log("Token",req.query.token)
+        if(token){
+            try {
+                const verified = jwt.verify(token, process.env.JWT_SECRET);
+                email = verified.email;
+                password = verified.password;
+                req.body = { email, password };
+                return signin(req, res);
+            } catch (error) {
+                if (error.name === "TokenExpiredError") {
+                    return res.status(401).json({ message: "Token has expired. Please request a new one." });
+                } else {
+                    return res.status(401).json({ message: "Invalid token. Authentication failed." });
+                }
 
-    module.exports = { signup, signin, logout, updateUser ,OAuth, googleSignup, checkAuth };
+        }
+    }
+    }
+
+
+// Function to generate the token
+const generateSignInToken = async (email, password) => {
+  const payload = {
+    email : email,
+    password: password,
+  };
+
+  const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7D' });
+  console.log(token)
+//   await sendEmail(email, token)
+  console.log(`${BASE_URL}/auth?token=${token}`)
+  
+  return token;
+};
+
+
+module.exports = { signup, signin, logout, updateUser ,OAuth, googleSignup, checkAuth, authSignIn, generateSignInToken };
 

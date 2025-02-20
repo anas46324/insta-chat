@@ -3,7 +3,8 @@ import { axiosInstance } from '../lib/axios'
 import toast from 'react-hot-toast'
 import { io } from 'socket.io-client'
 
-const BASE_URL = import.meta.env.MODE === " development" ? "http://localhost:3000" : "/"
+// const BASE_URL = "http://localhost:3000"
+const BASE_URL =  import.meta.env.MODE === " development" ?  "http://localhost:3000" : "/"
 
 const useAuthStore = create((set, get) => ({
 
@@ -19,7 +20,6 @@ const useAuthStore = create((set, get) => ({
         try {
             const res = await axiosInstance.get("/auth/check")
             if(res.data.length !== 0) {
-                console.log(res.data)
                 set({ authUser: res.data.data})
                 get().connectSocket()}
         }
@@ -96,6 +96,7 @@ const useAuthStore = create((set, get) => ({
     connectSocket: () => {
         const {authUser} = get()
         if(!authUser || get().socket?.connected) return
+        console.log(authUser)
         const socket = io(BASE_URL, {
             query:{
                 userId: authUser._id
@@ -113,6 +114,28 @@ const useAuthStore = create((set, get) => ({
     disconnectSocket: () => {
         if(get().socket.connected) return get().socket.disconnect()
     },
+
+    authRedirect: async (token) => {
+        if (token) {
+            try {
+                const res = await axiosInstance.post(`/auth/authSignIn?token=${token}`);
+                if (res.status === 200) {
+                    toast.success(res.data.message);
+                    set({ authUser: res.data.data });
+                    get().connectSocket();
+                }
+                else{
+                    toast.error(res.data.message)
+                }
+            } catch (error) {
+                toast.error(error.response?.data?.message || "Login failed");
+            } finally {
+                set({ isLoggingIn: false });
+            }
+        } else {
+            console.error("Token not found in URL");
+        }
+    }
 
 }))
 
